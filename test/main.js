@@ -12,9 +12,9 @@ import { pluginsList, pluginsUrl } from '../index.js'
 const { manifest } = pacote
 const { valid: validVersion, validRange, lt: ltVersion, major, minor, patch, minVersion } = semver
 
-const STRING_ATTRIBUTES = ['author', 'description', 'name', 'package', 'repo', 'status', 'version']
-const OPTIONAL_ATTRIBUTES = new Set(['status', 'compatibility', 'variables'])
-const ATTRIBUTES = new Set([...STRING_ATTRIBUTES, 'compatibility', 'variables'])
+const STRING_ATTRIBUTES = ['author', 'description', 'name', 'package', 'repo', 'status', 'version', 'docs']
+const OPTIONAL_ATTRIBUTES = new Set(['status', 'compatibility', 'variables', 'workflow', 'docs'])
+const ATTRIBUTES = new Set([...STRING_ATTRIBUTES, 'compatibility', 'variables', 'workflow'])
 const ENUMS = {
   status: ['DEACTIVATED', undefined],
 }
@@ -58,7 +58,7 @@ const getMajorVersion = function (version) {
 /* eslint-disable max-nested-callbacks */
 // eslint-disable-next-line max-lines-per-function, max-statements
 pluginsList.forEach((plugin) => {
-  const { package: packageName, repo, version, name, compatibility, variables } = plugin
+  const { package: packageName, repo, version, name, compatibility, variables, workflow } = plugin
 
   Object.entries(plugin).forEach(([attribute, value]) => {
     test(`Plugin attribute "${attribute}" should have a proper shape: ${packageName}`, (t) => {
@@ -97,13 +97,19 @@ pluginsList.forEach((plugin) => {
   })
 
   if (variables) {
-    test('Plugin variables should be an array of objects with name and description', (t) => {
+    test(`Plugin variables should be an array of objects with name and description: ${packageName}`, (t) => {
       t.true(Array.isArray(variables))
       variables.forEach((variable) => {
         t.true(isPlainObj(variable))
         t.true(typeof variable.name === 'string')
         t.true(typeof variable.description === 'string')
       })
+    })
+  }
+
+  if (workflow !== undefined) {
+    test(`Plugin Workflow should be a boolean`, (t) => {
+      t.true(typeof workflow === 'boolean')
     })
   }
 

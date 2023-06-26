@@ -1,8 +1,15 @@
-name: Sync CMS to Plugins Repository
+name: Publish Workflow UI
 on:
-  repository_dispatch:
-    # sync_cms_to_repo is a bespoke type created for use with the CMS Webhook
-    types: [sync_cms_to_repo]
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - site/plugins.json
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches-ignore:
+      - 'publish_workflow_ui_**'
 jobs:
   sync-to-repo:
     runs-on: ubuntu-latest
@@ -27,9 +34,7 @@ jobs:
         with:
           private-key: ${{ secrets.TOKENS_PRIVATE_KEY }}
           app-id: ${{ secrets.TOKENS_APP_ID }}
-      - name: Sync CMS to repo
+      - name: Upload Workflow UI files
         env:
           GITHUB_TOKEN: ${{ steps.get-token.outputs.token }}
-          CMS_CHANGES: ${{ toJson(github.event.client_payload) }}
-
-        run: bin/sync_cms_to_repo.sh
+        run: bin/publish_workflow_ui.sh
